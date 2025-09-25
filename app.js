@@ -3,23 +3,25 @@ const URL = "./my_model/";
 let model, webcam, labelContainer, maxPredictions;
 let facingMode = "user"; // เริ่มต้นกล้องหน้า ("user"), กล้องหลังใช้ "environment"
 
+// โหลดและเริ่มกล้อง + model
 async function init() {
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
+    // โหลด model
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
+
+    // ถ้ามี webcam เก่าให้หยุดก่อน
     if (webcam) {
         await webcam.stop();
         document.getElementById("webcam-container").innerHTML = "";
     }
 
     try {
-        // โหลด model
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
-
-        // สร้าง webcam ใหม่
-        webcam = new tmImage.Webcam(200, 200, false); // flip = false เพราะเราจะสลับกล้องเอง
-        await webcam.setup({ facingMode: facingMode }); // ส่ง options ไปที่ setup()
+        // สร้าง webcam ใหม่ โดยส่ง options แบบ object เพื่อรองรับ facingMode
+        webcam = new tmImage.Webcam(200, 200, true, { facingMode: facingMode });
+        await webcam.setup();
         await webcam.play();
 
         document.getElementById("webcam-container").appendChild(webcam.canvas);
@@ -30,8 +32,6 @@ async function init() {
             labelContainer.appendChild(document.createElement("div"));
         }
 
-        document.getElementById("debug-info").innerText = `ใช้กล้อง: ${facingMode === "user" ? "หน้า (user)" : "หลัง (environment)"}`;
-
         window.requestAnimationFrame(loop);
     } catch (err) {
         alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตกล้อง หรือใช้เบราว์เซอร์ที่รองรับ");
@@ -39,9 +39,10 @@ async function init() {
     }
 }
 
+// ฟังก์ชันสลับกล้อง
 async function switchCamera() {
     facingMode = (facingMode === "user") ? "environment" : "user";
-    document.getElementById("debug-info").innerText = `สลับกล้องเป็น: ${facingMode === "user" ? "หน้า (user)" : "หลัง (environment)"}`;
+    console.log("Switching camera to:", facingMode);
     await init();
 }
 
@@ -119,10 +120,3 @@ async function predict() {
         labelContainer.appendChild(predictionContainer);
     }
 }
-
-// เริ่มต้น
-window.onload = () => {
-    init();
-
-    document.getElementById("switch-camera-btn").addEventListener("click", switchCamera);
-};
