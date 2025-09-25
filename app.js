@@ -1,39 +1,48 @@
 const URL = "./my_model/";
 
 let model, webcam, labelContainer, maxPredictions;
-let facingMode = "user"; // เริ่มต้นกล้องหน้า
+let facingMode = "user"; // เริ่มต้นกล้องหน้า ("user"), กล้องหลังใช้ "environment"
 
-// เริ่มต้น webcam + โหลด model
+// โหลดและเริ่มกล้อง + model
 async function init() {
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
+    // โหลด model
     model = await tmImage.load(modelURL, metadataURL);
     maxPredictions = model.getTotalClasses();
 
-    // ปิดกล้องเก่าก่อน (ถ้ามี)
+    // ถ้ามี webcam เก่าให้หยุดก่อน
     if (webcam) {
         await webcam.stop();
         document.getElementById("webcam-container").innerHTML = "";
     }
 
-    // สร้างกล้องใหม่ตาม facingMode โดยส่ง options เป็น object
-    webcam = new tmImage.Webcam(200, 200, true, { facingMode: facingMode });
-    await webcam.setup();
-    await webcam.play();
-    window.requestAnimationFrame(loop);
+    try {
+        // สร้าง webcam ใหม่ โดยส่ง options แบบ object เพื่อรองรับ facingMode
+        webcam = new tmImage.Webcam(200, 200, true, { facingMode: facingMode });
+        await webcam.setup();
+        await webcam.play();
 
-    document.getElementById("webcam-container").appendChild(webcam.canvas);
-    labelContainer = document.getElementById("label-container");
-    labelContainer.innerHTML = "";
-    for (let i = 0; i < maxPredictions; i++) {
-        labelContainer.appendChild(document.createElement("div"));
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+        labelContainer = document.getElementById("label-container");
+        labelContainer.innerHTML = "";
+        for (let i = 0; i < maxPredictions; i++) {
+            labelContainer.appendChild(document.createElement("div"));
+        }
+
+        window.requestAnimationFrame(loop);
+    } catch (err) {
+        alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตกล้อง หรือใช้เบราว์เซอร์ที่รองรับ");
+        console.error("Error accessing webcam:", err);
     }
 }
 
-// ฟังก์ชันเปลี่ยนกล้อง
+// ฟังก์ชันสลับกล้อง
 async function switchCamera() {
     facingMode = (facingMode === "user") ? "environment" : "user";
+    console.log("Switching camera to:", facingMode);
     await init();
 }
 
@@ -88,7 +97,6 @@ async function predict() {
         const treatmentText = document.createElement("div");
         treatmentText.className = "treatment-text";
 
-        // คำแนะนำ
         if (className === "Fungal diseases") {
             treatmentText.textContent = "แนะนำ: ใช้ยาป้องกันเชื้อรา เช่น แมนโคเซบ หรือ คาร์เบนดาซิม";
         } else if (className === "Bacterial diseases") {
