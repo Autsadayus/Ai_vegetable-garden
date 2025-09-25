@@ -1,0 +1,76 @@
+/* จัด layout หลักให้อยู่ตรงกลางแนวตั้งและแนวนอน */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* ตรงกลางแนวนอน */
+  justify-content: center;    /* ตรงกลางแนวตั้ง */
+  gap: 20px;
+  padding: 20px;
+  min-height: 80vh;
+}
+
+/* ปุ่ม Start */
+button.mdl-button {
+  padding: 10px 24px;
+  font-size: 16px;
+  cursor: pointer; /* แก้จาก center เป็น pointer */
+  align-self: center; /* ปรับตำแหน่งให้ปุ่มอยู่กลาง */
+}
+
+/* กล่องเว็บแคม */
+#webcam-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+/* กล่อง prediction แต่ละอัน */
+.progress-bar-container {
+  width: 300px;
+  margin-bottom: 15px;
+}
+
+/* แถบพื้นหลัง */
+.progress-bar {
+  background-color: #fcfcfc;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 20px;
+  margin-bottom: 5px;
+}
+
+/* แถบสีแสดงเปอร์เซ็นต์ */
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background-color: green; /* จะถูกเปลี่ยนใน JavaScript */
+  transition: width 0.5s ease-in-out;
+  border-radius: 10px;
+}
+
+/* ตัวเลขเปอร์เซ็นต์ */
+.progress-text {
+  font-size: 14px;
+  color: #333;
+  text-align: right;
+  font-weight: bold;
+}
+.treatment-text {
+  font-size: 13px;
+  color: #555;
+  margin-top: 4px;
+  font-style: italic;
+}
+.page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        
+  justify-content: center;    
+  gap: 20px;
+  padding: 20px;
+
+  min-height: 100vh;         /* ให้สูงเต็มจอ */
+  width: 100%;               /* ให้กว้างเต็มจอ */
+  background-color: #e6f7e6; /* พื้นหลังเขียวอ่อน */
+}
+
