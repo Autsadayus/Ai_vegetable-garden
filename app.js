@@ -1,34 +1,27 @@
 const URL = "./my_model/";
 
 let model, webcam, labelContainer, maxPredictions;
-let facingMode = "user"; // เริ่มต้นกล้องหน้า
+let facingMode = "user"; // เริ่มต้นกล้องหน้า ("user"), กล้องหลังใช้ "environment"
 
+// โหลดและเริ่มกล้อง + model
 async function init() {
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
+    // โหลด model
     model = await tmImage.load(modelURL, metadataURL);
     maxPredictions = model.getTotalClasses();
 
-    if (webcam && webcam.stream) {
-        // ปิด stream เก่า
-        webcam.stream.getTracks().forEach(track => track.stop());
+    // ถ้ามี webcam เก่าให้หยุดก่อน
+    if (webcam) {
+        await webcam.stop();
         document.getElementById("webcam-container").innerHTML = "";
     }
 
     try {
-        const constraints = {
-            video: {
-                width: 200,
-                height: 200,
-                facingMode: facingMode  // "user" หรือ "environment"
-            }
-        };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-        // สร้าง webcam แบบไม่มีการสร้าง stream ใหม่ (ใช้ stream ที่ได้)
-        webcam = new tmImage.Webcam(200, 200, true);
-        await webcam.setup({ video: stream });
+        // สร้าง webcam ใหม่ โดยส่ง options แบบ object เพื่อรองรับ facingMode
+        webcam = new tmImage.Webcam(200, 200, true, { facingMode: facingMode });
+        await webcam.setup();
         await webcam.play();
 
         document.getElementById("webcam-container").appendChild(webcam.canvas);
@@ -41,11 +34,12 @@ async function init() {
 
         window.requestAnimationFrame(loop);
     } catch (err) {
-        alert("ไม่สามารถเข้าถึงกล้อง: " + err.message);
+        alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตกล้อง หรือใช้เบราว์เซอร์ที่รองรับ");
         console.error("Error accessing webcam:", err);
     }
 }
 
+// ฟังก์ชันสลับกล้อง
 async function switchCamera() {
     facingMode = (facingMode === "user") ? "environment" : "user";
     console.log("Switching camera to:", facingMode);
@@ -82,6 +76,7 @@ async function predict() {
         progressBarFill.className = "progress-bar-fill";
         progressBarFill.style.width = (probability * 100).toFixed(2) + "%";
 
+        // สีตาม class
         switch (className) {
             case "Fungal diseases":
                 progressBarFill.style.backgroundColor = "#7E57C2";
