@@ -1,7 +1,6 @@
 const URL = "./my_model/";
 
 let model, webcam, labelContainer, maxPredictions;
-let facingMode = "user"; // เริ่มต้นกล้องหน้า ("user"), กล้องหลังใช้ "environment"
 
 // โหลดและเริ่มกล้อง + model
 async function init() {
@@ -19,8 +18,8 @@ async function init() {
     }
 
     try {
-        // สร้าง webcam ใหม่ โดยส่ง options แบบ object เพื่อรองรับ facingMode
-        webcam = new tmImage.Webcam(200, 200, true, { facingMode: facingMode });
+        // สร้าง webcam ใหม่ ใช้กล้องหน้า (facingMode: "user")
+        webcam = new tmImage.Webcam(200, 200, true, { facingMode: "user" });
         await webcam.setup();
         await webcam.play();
 
@@ -37,13 +36,6 @@ async function init() {
         alert("ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตกล้อง หรือใช้เบราว์เซอร์ที่รองรับ");
         console.error("Error accessing webcam:", err);
     }
-}
-
-// ฟังก์ชันสลับกล้อง
-async function switchCamera() {
-    facingMode = (facingMode === "user") ? "environment" : "user";
-    console.log("Switching camera to:", facingMode);
-    await init();
 }
 
 async function loop() {
